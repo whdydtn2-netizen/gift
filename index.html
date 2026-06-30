@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>선물톡 — 돌잔치·결혼식 답례품 전문</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
+<style>
+  :root {
+    --pink-50: #FBEAF0;
+    --pink-100: #F4C0D1;
+    --pink-200: #ED93B1;
+    --pink-400: #D4537E;
+    --pink-600: #993556;
+    --pink-800: #72243E;
+    --pink-900: #4B1528;
+    --amber-50: #FAEEDA;
+    --amber-100: #FAC775;
+    --amber-200: #EF9F27;
+    --amber-600: #854F0B;
+    --amber-800: #633806;
+    --amber-900: #412402;
+    --cream: #FFFBF3;
+    --ink: #4B1528;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    line-height: 1.6;
+  }
+  a { text-decoration: none; color: inherit; }
+  img { max-width: 100%; display: block; }
+
+  /* ===== Header ===== */
+  header {
+    background: var(--pink-50);
+    border-bottom: 1px solid #F6D8E3;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .logo {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--pink-600);
+    letter-spacing: -0.5px;
+  }
+  .logo span {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--pink-400);
+    margin-left: 4px;
+  }
+  nav {
+    display: flex;
+    gap: 20px;
+    font-size: 13px;
+    color: var(--pink-800);
+    flex-wrap: wrap;
+  }
+  nav a { transition: color 0.15s; }
+  nav a:hover { color: var(--pink-400); }
+  nav a.active { color: var(--pink-400); font-weight: 700; }
+  .cta-btn {
+    background: var(--amber-100);
+    color: var(--amber-800);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 18px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .cta-btn:hover { background: var(--amber-200); }
+
+  /* ===== Hero ===== */
+  .hero {
+    background: var(--pink-50);
+    text-align: center;
+    padding: 56px 24px 48px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--amber-100);
+    color: var(--amber-800);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 16px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--pink-900);
+    line-height: 1.4;
+    margin-bottom: 14px;
+    letter-spacing: -0.5px;
+  }
+  .hero p.sub-hero {
+    font-size: 18px;
+    color: var(--pink-800);
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+  .hero p.sub {
+    font-size: 16px;
+    color: var(--pink-600);
+    margin-bottom: 30px;
+  }
+  .hero-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    background: var(--pink-400);
+    color: var(--pink-50);
+    border: none;
+    padding: 14px 28px;
+    border-radius: 26px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .btn-primary:hover { background: var(--pink-600); transform: translateY(-1px); }
+  .btn-secondary {
+    background: #fff;
+    color: var(--pink-600);
+    border: 1.5px solid var(--pink-200);
+    padding: 14px 28px;
+    border-radius: 26px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.1s;
+  }
+  .btn-secondary:hover { border-color: var(--pink-400); transform: translateY(-1px); }
+
+  /* ===== Category grid ===== */
+  .section {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 56px 24px;
+  }
+  .section-title {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--amber-600);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .section-heading {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--pink-900);
+    margin-bottom: 36px;
+  }
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
+  .category-card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 20px 16px;
+    text-align: center;
+    border: 1px solid #F6E3EA;
+    transition: transform 0.15s, box-shadow 0.15s;
+    cursor: pointer;
+  }
+  .category-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(212, 83, 126, 0.12);
+  }
+  .category-card .icon-box {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+  }
+  .category-card .icon-box i { font-size: 36px; }
+  .category-card.pink .icon-box { background: var(--pink-50); }
+  .category-card.pink .icon-box i { color: var(--pink-400); }
+  .category-card.amber .icon-box { background: var(--amber-50); }
+  .category-card.amber .icon-box i { color: var(--amber-600); }
+  .category-card .name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--pink-900);
+    margin-bottom: 4px;
+  }
+  .category-card.amber .name { color: var(--amber-900); }
+  .category-card .price {
+    font-size: 13px;
+    color: var(--pink-600);
+  }
+  .category-card.amber .price { color: var(--amber-600); }
+
+  /* ===== Process info card ===== */
+  .info-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 28px;
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    border: 1px solid #F6E3EA;
+    max-width: 1080px;
+    margin: 0 auto 56px;
+  }
+  .info-card .circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--amber-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .info-card .circle i { font-size: 30px; color: var(--amber-800); }
+  .info-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--pink-900);
+    margin-bottom: 4px;
+  }
+  .info-card p {
+    font-size: 14px;
+    color: var(--pink-600);
+  }
+
+  /* ===== Process steps ===== */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .step {
+    text-align: center;
+    padding: 20px 12px;
+  }
+  .step .num {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--pink-50);
+    color: var(--pink-600);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .step .step-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--pink-900);
+    margin-bottom: 4px;
+  }
+  .step .step-desc {
+    font-size: 13px;
+    color: var(--pink-600);
+  }
+
+  /* ===== Footer ===== */
+  footer {
+    background: var(--pink-50);
+    text-align: center;
+    padding: 32px 24px;
+    border-top: 1px solid #F6D8E3;
+    font-size: 13px;
+    color: var(--pink-600);
+  }
+
+  @media (max-width: 720px) {
+    .category-grid { grid-template-columns: repeat(2, 1fr); }
+    .steps { grid-template-columns: repeat(2, 1fr); }
+    .hero h1 { font-size: 26px; }
+    nav { display: none; }
+    .info-card { flex-direction: column; text-align: center; padding: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="logo">선물톡 <span>giftalk</span></a>
+    <nav>
+      <a href="gift-list.html">선물 목록</a>
+      <a href="wedding.html">결혼·돌잔치답례</a>
+      <a href="graduation.html">졸업선물</a>
+      <a href="holiday.html">명절선물</a>
+      <a href="gathering.html">모임선물</a>
+      <a href="contact.html">고객문의</a>
+    </nav>
+    <button class="cta-btn" onclick="window.location.href='contact.html'">견적받기</button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="badge"><i class="ti ti-sparkles"></i> 오늘의 작은 정성, 선물톡</div>
+  <h1>톡, 건네는 작은 정성</h1>
+  <p class="sub-hero">밋밋한 선물을 정성가득 예쁘게</p>
+  <p class="sub">기획부터 포장, 배송까지 한 번에</p>
+  <div class="hero-actions">
+    <button class="btn-primary" onclick="window.location.href='gift-list.html'">선물 둘러보기</button>
+    <button class="btn-secondary" onclick="window.location.href='contact.html'">무료 견적 받기</button>
+  </div>
+</section>
+
+<section class="section">
+  <p class="section-title">✦ CATEGORY ✦</p>
+  <h2 class="section-heading">행사별 베스트 선물</h2>
+  <div class="category-grid">
+
+    <div class="category-card pink" onclick="window.location.href='wedding.html'">
+      <div class="icon-box"><i class="ti ti-gift"></i></div>
+      <div class="name">돌잔치 답례</div>
+      <div class="price">5,000원~</div>
+    </div>
+
+    <div class="category-card amber" onclick="window.location.href='wedding.html'">
+      <div class="icon-box"><i class="ti ti-heart"></i></div>
+      <div class="name">결혼식 답례</div>
+      <div class="price">8,000원~</div>
+    </div>
+
+    <div class="category-card pink" onclick="window.location.href='graduation.html'">
+      <div class="icon-box"><i class="ti ti-school"></i></div>
+      <div class="name">졸업·입학</div>
+      <div class="price">3,000원~</div>
+    </div>
+
+    <div class="category-card amber" onclick="window.location.href='holiday.html'">
+      <div class="icon-box"><i class="ti ti-lantern"></i></div>
+      <div class="name">명절 선물</div>
+      <div class="price">10,000원~</div>
+    </div>
+
+  </div>
+</section>
+
+<div class="info-card">
+  <div class="circle"><i class="ti ti-package"></i></div>
+  <div>
+    <h3>수량부터 포장 스타일까지, 톡톡 골라보세요</h3>
+    <p>20개부터 500개까지 · 7~14일 제작 · 일괄·개별 배송 선택 가능</p>
+  </div>
+</div>
+
+<section class="section" style="padding-top:0;">
+  <p class="section-title">✦ HOW IT WORKS ✦</p>
+  <h2 class="section-heading">주문은 이렇게 진행돼요</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="num">1</div>
+      <div class="step-title">옵션 선택</div>
+      <div class="step-desc">행사·수량·포장 스타일 선택</div>
+    </div>
+    <div class="step">
+      <div class="num">2</div>
+      <div class="step-title">견적 확인</div>
+      <div class="step-desc">자동 견적 + 담당자 확인</div>
+    </div>
+    <div class="step">
+      <div class="num">3</div>
+      <div class="step-title">제작·포장</div>
+      <div class="step-desc">7~14일 정성스러운 제작</div>
+    </div>
+    <div class="step">
+      <div class="num">4</div>
+      <div class="step-title">배송 완료</div>
+      <div class="step-desc">일괄 또는 개별 배송</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  © 2026 선물톡 (giftalk). 대외비 시안 — 실제 상호·연락처는 추후 확정 예정입니다.
+</footer>
+
+<script src="common.js"></script>
+</body>
+</html>

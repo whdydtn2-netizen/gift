@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>결혼·돌잔치답례 — 선물톡</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
+<link rel="stylesheet" href="common.css">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="logo">선물톡 <span>giftalk</span></a>
+    <nav>
+      <a href="gift-list.html">선물 목록</a>
+      <a href="wedding.html" class="active">결혼·돌잔치답례</a>
+      <a href="graduation.html">졸업선물</a>
+      <a href="holiday.html">명절선물</a>
+      <a href="gathering.html">모임선물</a>
+      <a href="contact.html">고객문의</a>
+    </nav>
+    <button class="cta-btn" onclick="window.location.href='contact.html'">견적받기</button>
+  </div>
+</header>
+
+<div class="page-banner">
+  <h1>결혼·돌잔치답례</h1>
+  <p>소중한 날을 기억할 특별한 답례품</p>
+</div>
+
+<section class="section">
+  <div id="product-grid" class="product-grid"></div>
+</section>
+
+<footer>
+  © 2026 선물톡 (giftalk). 대외비 시안 — 실제 상호·연락처는 추후 확정 예정입니다.
+</footer>
+
+<script src="common.js"></script>
+<script>
+  renderProductGrid(getProductsByCategory('wedding'), 'product-grid');
+</script>
+</body>
+</html>
