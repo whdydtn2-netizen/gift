@@ -798,7 +798,6 @@ function buildCartItemFromForm() {
   return {
     productId: product.id,
     productName: product.name,
-    productImage: product.image || '',
     priceTiers: product.priceTiers || [],
     qty: qty,
     wrapping: wrapOn ? (selectedWrapping || null) : null,
@@ -811,14 +810,14 @@ function buildCartItemFromForm() {
 function addProductToCart() {
   var item = buildCartItemFromForm();
   if (!item) return;
-  addToCart(item);
+  if (!addToCart(item)) return;
   alert('장바구니에 담았습니다.');
 }
 
 function orderNow() {
   var item = buildCartItemFromForm();
   if (!item) return;
-  addToCart(item);
+  if (!addToCart(item)) return;
   window.location.href = 'cart.html';
 }
 

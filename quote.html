@@ -803,10 +803,9 @@ function addQuoteToCart() {
   var letterOn = document.getElementById('letter-toggle').checked;
   var letterTxt = document.getElementById('letter-text').value.trim();
 
-  addToCart({
+  var added = addToCart({
     productId: selectedProduct.id,
     productName: selectedProduct.name,
-    productImage: selectedProduct.image || '',
     priceTiers: selectedProduct.priceTiers || [],
     qty: qty,
     wrapping: wrapOn ? (selectedWrapping || null) : null,
@@ -814,6 +813,7 @@ function addQuoteToCart() {
     letterText: letterOn ? letterTxt : '',
     sticker: selectedSticker
   });
+  if (!added) return;
 
   saveCheckoutDraft({
     address: document.getElementById('q-address').value.trim(),

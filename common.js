@@ -56,16 +56,21 @@ function getCart() {
 }
 
 function saveCart(items) {
-  localStorage.setItem(CART_KEY, JSON.stringify(items));
+  try {
+    localStorage.setItem(CART_KEY, JSON.stringify(items));
+  } catch (e) {
+    alert('저장 공간이 부족해 장바구니에 반영하지 못했습니다. 상품 이미지 용량을 줄이거나 장바구니를 정리해주세요.');
+    return false;
+  }
   refreshCartBadge();
+  return true;
 }
 
 function addToCart(item) {
   const items = getCart();
   item.id = Date.now().toString() + Math.random().toString(36).slice(2, 5);
   items.push(item);
-  saveCart(items);
-  return item;
+  return saveCart(items) ? item : null;
 }
 
 function removeFromCart(id) {

@@ -247,14 +247,19 @@ function renderCart() {
   var totalPrice = 0;
   var hasUnknown = false;
 
+  var products = getProducts();
+
   var itemsHtml = items.map(function(item) {
     var qty = Number(item.qty) || 0;
     var unit = getUnitPriceForQty(item.priceTiers, qty);
     totalQty += qty;
     if (unit !== null) { totalPrice += unit * qty; } else { hasUnknown = true; }
 
-    var thumbHtml = item.productImage
-      ? '<img src="' + escapeHtml(item.productImage) + '" alt="" onerror="this.parentNode.innerHTML=\'<i class=\\\'ti ti-photo\\\'></i>\'">'
+    var product = products.find(function(p) { return p.id === item.productId; });
+    var image = product && product.image ? product.image : '';
+
+    var thumbHtml = image
+      ? '<img src="' + escapeHtml(image) + '" alt="" onerror="this.parentNode.innerHTML=\'<i class=\\\'ti ti-photo\\\'></i>\'">'
       : '<i class="ti ti-photo"></i>';
 
     return '<div class="cart-item">' +
