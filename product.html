@@ -627,13 +627,14 @@ function render() {
         '<button class="btn-outline" onclick="addProductToCart()">' +
           '<i class="ti ti-shopping-cart"></i> 장바구니에 담기' +
         '</button>' +
-        '<button class="btn-inquire" onclick="goInquire()">' +
-          '<i class="ti ti-send"></i> 견적 문의하기' +
+        '<button class="btn-inquire" onclick="orderNow()">' +
+          '<i class="ti ti-send"></i> 바로 주문하기' +
         '</button>' +
       '</div>' +
     '</div>';
 
   refreshAll();
+  setupSliderSwipe();
 }
 
 /* ===== Image slider ===== */
@@ -649,6 +650,31 @@ function goToSlide(i) {
 
 function slideNext() { goToSlide(currentSlide + 1); }
 function slidePrev() { goToSlide(currentSlide - 1); }
+
+function setupSliderSwipe() {
+  var track = document.getElementById('slider-track');
+  if (!track || slideImages.length < 2) return;
+
+  var startX = null;
+  var dragging = false;
+
+  function onStart(x) { startX = x; dragging = true; }
+  function onEnd(x) {
+    if (!dragging || startX === null) return;
+    dragging = false;
+    var diff = x - startX;
+    startX = null;
+    if (Math.abs(diff) < 40) return;
+    if (diff < 0) slideNext(); else slidePrev();
+  }
+
+  track.addEventListener('touchstart', function(e) { onStart(e.touches[0].clientX); }, { passive: true });
+  track.addEventListener('touchend', function(e) { onEnd(e.changedTouches[0].clientX); });
+
+  track.addEventListener('mousedown', function(e) { onStart(e.clientX); e.preventDefault(); });
+  track.addEventListener('mouseup', function(e) { onEnd(e.clientX); });
+  track.addEventListener('mouseleave', function() { dragging = false; startX = null; });
+}
 
 /* ===== Quantity ===== */
 function changeQty(delta) {
@@ -760,20 +786,16 @@ function refreshSummary() {
   }
 }
 
-function goInquire() {
-  window.location.href = 'quote.html?id=' + product.id;
-}
-
-function addProductToCart() {
+function buildCartItemFromForm() {
   var qty = parseInt(document.getElementById('qty-input').value) || 0;
-  if (!qty) { alert('수량을 입력해주세요.'); return; }
+  if (!qty) { alert('수량을 입력해주세요.'); return null; }
 
   var wrapOn = document.getElementById('wrap-toggle') && document.getElementById('wrap-toggle').checked;
   var ribbonOn = document.getElementById('ribbon-toggle') && document.getElementById('ribbon-toggle').checked;
   var letterOn = document.getElementById('letter-toggle') && document.getElementById('letter-toggle').checked;
   var letterTxt = document.getElementById('letter-text') ? document.getElementById('letter-text').value.trim() : '';
 
-  addToCart({
+  return {
     productId: product.id,
     productName: product.name,
     productImage: product.image || '',
@@ -783,9 +805,21 @@ function addProductToCart() {
     ribbon: !!ribbonOn,
     letterText: letterOn ? letterTxt : '',
     sticker: product.hasSticker ? selectedSticker : null
-  });
+  };
+}
 
+function addProductToCart() {
+  var item = buildCartItemFromForm();
+  if (!item) return;
+  addToCart(item);
   alert('장바구니에 담았습니다.');
+}
+
+function orderNow() {
+  var item = buildCartItemFromForm();
+  if (!item) return;
+  addToCart(item);
+  window.location.href = 'cart.html';
 }
 
 init();
