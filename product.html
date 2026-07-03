@@ -45,6 +45,59 @@
   .detail-img img { width: 100%; height: 100%; object-fit: cover; }
   .detail-img .no-img { font-size: 72px; color: var(--pink-200); }
 
+  /* ===== Detail image slider ===== */
+  .slider-track {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.3s ease;
+  }
+  .slider-track .slide {
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+  }
+  .slider-track .slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .slider-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.85);
+    color: var(--pink-600);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background 0.15s;
+  }
+  .slider-arrow:hover { background: #fff; }
+  .slider-arrow.prev { left: 12px; }
+  .slider-arrow.next { right: 12px; }
+  .slider-dots {
+    position: absolute;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+  }
+  .slider-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.6);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.15s;
+    border: none;
+    padding: 0;
+  }
+  .slider-dot.active { background: #fff; transform: scale(1.3); }
+
   /* ===== Info ===== */
   .detail-name {
     font-size: 26px;
@@ -318,6 +371,8 @@
 var product = null;
 var selectedWrapping = null;
 var selectedSticker = '선택 안 함';
+var slideImages = [];
+var currentSlide = 0;
 
 function init() {
   var params = new URLSearchParams(window.location.search);
@@ -477,11 +532,31 @@ function render() {
   var sumStickerRow = product.hasSticker
     ? '<div class="sum-row"><span>스티커</span><span id="s-sticker">' + escapeHtml(selectedSticker) + '</span></div>' : '';
 
-  /* ---- image ---- */
-  var imgHtml = product.image
-    ? '<img src="' + escapeHtml(product.image) + '" alt="' + escapeHtml(product.name) + '" ' +
-      'onerror="this.parentNode.innerHTML=\'<div class=\\\'no-img\\\'><i class=\\\'ti ti-photo\\\'></i></div>\'">'
-    : '<div class="no-img"><i class="ti ti-photo"></i></div>';
+  /* ---- image slider ---- */
+  slideImages = (product.detailImages && product.detailImages.length) ? product.detailImages
+    : (product.image ? [product.image] : []);
+  currentSlide = 0;
+
+  var imgHtml;
+  if (!slideImages.length) {
+    imgHtml = '<div class="no-img"><i class="ti ti-photo"></i></div>';
+  } else {
+    imgHtml =
+      '<div class="slider-track" id="slider-track">' +
+        slideImages.map(function(src) {
+          return '<div class="slide"><img src="' + escapeHtml(src) + '" alt="' + escapeHtml(product.name) + '"></div>';
+        }).join('') +
+      '</div>' +
+      (slideImages.length > 1
+        ? '<button type="button" class="slider-arrow prev" onclick="slidePrev()"><i class="ti ti-chevron-left"></i></button>' +
+          '<button type="button" class="slider-arrow next" onclick="slideNext()"><i class="ti ti-chevron-right"></i></button>' +
+          '<div class="slider-dots" id="slider-dots">' +
+            slideImages.map(function(_, i) {
+              return '<button type="button" class="slider-dot' + (i === 0 ? ' active' : '') + '" onclick="goToSlide(' + i + ')"></button>';
+            }).join('') +
+          '</div>'
+        : '');
+  }
 
   document.getElementById('page-root').innerHTML =
     '<div class="detail-wrap">' +
@@ -538,6 +613,20 @@ function render() {
 
   refreshAll();
 }
+
+/* ===== Image slider ===== */
+function goToSlide(i) {
+  if (!slideImages.length) return;
+  currentSlide = ((i % slideImages.length) + slideImages.length) % slideImages.length;
+  var track = document.getElementById('slider-track');
+  if (track) track.style.transform = 'translateX(-' + (currentSlide * 100) + '%)';
+  document.querySelectorAll('#slider-dots .slider-dot').forEach(function(d, idx) {
+    d.classList.toggle('active', idx === currentSlide);
+  });
+}
+
+function slideNext() { goToSlide(currentSlide + 1); }
+function slidePrev() { goToSlide(currentSlide - 1); }
 
 /* ===== Quantity ===== */
 function changeQty(delta) {
