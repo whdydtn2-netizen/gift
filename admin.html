@@ -519,6 +519,7 @@
       <a href="graduation.html">졸업선물</a>
       <a href="holiday.html">명절선물</a>
       <a href="gathering.html">모임선물</a>
+      <a href="celebration.html">축하선물</a>
       <a href="contact.html">고객문의</a>
     </nav>
     <div style="display:flex;align-items:center;gap:10px;">
@@ -555,7 +556,6 @@
       <label>제공 옵션</label>
       <div class="opt-checks">
         <label class="opt-check"><input type="checkbox" id="p-has-wrapping"> <i class="ti ti-box"></i> 포장 옵션</label>
-        <label class="opt-check"><input type="checkbox" id="p-has-print"> <i class="ti ti-writing"></i> 인쇄 옵션</label>
       </div>
     </div>
 
@@ -566,6 +566,7 @@
         <label class="opt-check"><input type="checkbox" name="p-cat" value="graduation"> 졸업선물</label>
         <label class="opt-check"><input type="checkbox" name="p-cat" value="holiday"> 명절선물</label>
         <label class="opt-check"><input type="checkbox" name="p-cat" value="gathering"> 모임선물</label>
+        <label class="opt-check"><input type="checkbox" name="p-cat" value="celebration"> 축하선물</label>
       </div>
     </div>
 
@@ -629,7 +630,6 @@
       <label>제공 옵션</label>
       <div class="opt-checks">
         <label class="opt-check"><input type="checkbox" id="e-has-wrapping"> <i class="ti ti-box"></i> 포장 옵션</label>
-        <label class="opt-check"><input type="checkbox" id="e-has-print"> <i class="ti ti-writing"></i> 인쇄 옵션</label>
       </div>
     </div>
 
@@ -640,6 +640,7 @@
         <label class="opt-check"><input type="checkbox" name="e-cat" value="graduation"> 졸업선물</label>
         <label class="opt-check"><input type="checkbox" name="e-cat" value="holiday"> 명절선물</label>
         <label class="opt-check"><input type="checkbox" name="e-cat" value="gathering"> 모임선물</label>
+        <label class="opt-check"><input type="checkbox" name="e-cat" value="celebration"> 축하선물</label>
       </div>
     </div>
 
@@ -775,13 +776,12 @@ function submitProduct() {
   var tiers = getTiers();
   var categories = getCheckedCats('p-cat');
   var hasWrapping = document.getElementById('p-has-wrapping').checked;
-  var hasPrint = document.getElementById('p-has-print').checked;
 
   if (!name) { showToast('상품명을 입력해주세요.'); return; }
   if (!tiers.length) { showToast('수량별 가격을 최소 1개 설정해주세요.'); return; }
   if (!categories.length) { showToast('카테고리를 하나 이상 선택해주세요.'); return; }
 
-  addProduct({ name: name, priceTiers: tiers, categories: categories, description: description, image: image, hasWrapping: hasWrapping, hasPrint: hasPrint });
+  addProduct({ name: name, priceTiers: tiers, categories: categories, description: description, image: image, hasWrapping: hasWrapping });
   showToast('상품이 추가되었습니다!');
   resetForm();
   renderList();
@@ -795,7 +795,6 @@ function resetForm() {
   document.getElementById('p-img-url').value = '';
   document.getElementById('img-preview').style.display = 'none';
   document.getElementById('p-has-wrapping').checked = false;
-  document.getElementById('p-has-print').checked = false;
   document.querySelectorAll('input[name="p-cat"]').forEach(function(el) { el.checked = false; });
   document.getElementById('tier-list').innerHTML = '';
   tierCount = 0;
@@ -860,7 +859,6 @@ function openEditModal(id) {
   document.getElementById('e-name').value = p.name || '';
   document.getElementById('e-desc').value = p.description || '';
   document.getElementById('e-has-wrapping').checked = !!p.hasWrapping;
-  document.getElementById('e-has-print').checked = !!p.hasPrint;
   var existingCats = getProductCategories(p);
   document.querySelectorAll('input[name="e-cat"]').forEach(function(el) {
     el.checked = existingCats.indexOf(el.value) !== -1;
@@ -967,8 +965,7 @@ function saveEdit() {
     description: document.getElementById('e-desc').value.trim(),
     image: finalImage,
     priceTiers: tiers,
-    hasWrapping: document.getElementById('e-has-wrapping').checked,
-    hasPrint: document.getElementById('e-has-print').checked
+    hasWrapping: document.getElementById('e-has-wrapping').checked
   });
 
   closeEditModal();

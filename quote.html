@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>무료 견적받기 — 선물톡</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
+<link rel="stylesheet" href="common.css">
+<style>
+  .quote-wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 36px 24px 60px;
+  }
+
+  /* ===== Option Sections (same as product detail page) ===== */
+  .option-block {
+    border: 1px solid #F6E3EA;
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    background: #fff;
+  }
+  .option-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .option-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--pink-900);
+  }
+  .option-title i { color: var(--pink-400); font-size: 18px; }
+
+  /* Toggle switch */
+  .toggle-switch {
+    position: relative;
+    width: 46px;
+    height: 26px;
+    flex-shrink: 0;
+  }
+  .toggle-switch input { display: none; }
+  .toggle-track {
+    position: absolute;
+    inset: 0;
+    background: #F4C0D1;
+    border-radius: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .toggle-track::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  }
+  .toggle-switch input:checked + .toggle-track { background: var(--pink-400); }
+  .toggle-switch input:checked + .toggle-track::after { transform: translateX(20px); }
+
+  /* Quantity control */
+  .qty-wrap { margin-top: 14px; }
+  .qty-ctrl {
+    display: inline-flex;
+    align-items: center;
+    border: 1.5px solid #F4C0D1;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .qty-btn {
+    width: 42px;
+    height: 42px;
+    border: none;
+    background: var(--pink-50);
+    color: var(--pink-600);
+    font-size: 20px;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .qty-btn:hover { background: var(--pink-100); }
+  #qty-input {
+    width: 72px;
+    border: none;
+    border-left: 1.5px solid #F4C0D1;
+    border-right: 1.5px solid #F4C0D1;
+    text-align: center;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--pink-900);
+    outline: none;
+    padding: 8px 0;
+    font-family: inherit;
+  }
+  .qty-note { font-size: 12px; color: var(--pink-400); margin-top: 7px; }
+
+  /* Grid-style choice cards (wrapping / ribbon / sticker) */
+  .wrap-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .wrap-card {
+    border: 2px solid #F4C0D1;
+    border-radius: 12px;
+    padding: 14px 10px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--pink-800);
+    transition: all 0.15s;
+    background: #fff;
+  }
+  .wrap-card:hover { border-color: var(--pink-400); background: var(--pink-50); }
+  .wrap-card.selected { border-color: var(--pink-400); background: var(--pink-50); color: var(--pink-600); }
+  .wrap-card i { display: block; font-size: 26px; color: var(--pink-300); margin-bottom: 6px; }
+  .wrap-card.selected i { color: var(--pink-400); }
+
+  /* Text input for enclosed letter */
+  .print-area { margin-top: 14px; }
+  .print-textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid #F4C0D1;
+    border-radius: 12px;
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+    resize: none;
+    font-family: inherit;
+    min-height: 80px;
+    transition: border-color 0.15s;
+  }
+  .print-textarea:focus { border-color: var(--pink-400); }
+  .print-counter { font-size: 12px; color: var(--pink-400); text-align: right; margin-top: 4px; }
+
+  /* Price tiers */
+  .price-tiers-box {
+    background: var(--pink-50);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+    border: 1px solid #F4C0D1;
+  }
+  .price-tiers-box h4 {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--pink-800);
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .tier-row-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    font-size: 14px;
+    border-bottom: 1px dashed #F4C0D1;
+  }
+  .tier-row-display:last-child { border-bottom: none; }
+  .tier-row-display.active-tier { color: var(--pink-400); font-weight: 700; }
+  .tier-range { color: var(--pink-800); }
+  .tier-unit { font-weight: 600; }
+
+  /* Price summary */
+  .price-summary {
+    background: var(--cream);
+    border: 1.5px solid #F4C0D1;
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 20px;
+  }
+  .sum-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: var(--pink-700);
+    padding: 5px 0;
+  }
+  .sum-row span:last-child { font-weight: 600; color: var(--pink-900); }
+  .sum-divider { border: none; border-top: 1px solid #F4C0D1; margin: 10px 0; }
+  .sum-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--pink-900);
+    padding-top: 4px;
+  }
+  .sum-total .total-amt { color: var(--pink-400); }
+  .sum-note { font-size: 11px; color: var(--pink-400); margin-top: 6px; text-align: right; }
+
+  .btn-inquire {
+    width: 100%;
+    background: var(--pink-400);
+    color: #fff;
+    border: none;
+    padding: 16px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-inquire:hover { background: var(--pink-600); transform: translateY(-1px); }
+
+  /* Plain form fields (address / contact / request) */
+  .form-group { margin-top: 14px; }
+  .form-group:first-child { margin-top: 0; }
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid #F4C0D1;
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--ink);
+    background: #fff;
+    outline: none;
+    transition: border-color 0.15s;
+    font-family: inherit;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus { border-color: var(--pink-400); }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+
+  /* Product picker */
+  .product-pick-box {
+    margin-top: 14px;
+    border: 2px dashed #F4C0D1;
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+    cursor: pointer;
+    color: var(--pink-600);
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+  .product-pick-box:hover { border-color: var(--pink-400); background: var(--pink-50); }
+  .product-pick-box i { display: block; font-size: 24px; color: var(--pink-300); margin-bottom: 6px; }
+  .product-pick-filled {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1.5px solid #F4C0D1;
+    border-radius: 12px;
+    padding: 10px 12px;
+  }
+  .product-pick-filled .pp-thumb {
+    width: 52px;
+    height: 52px;
+    border-radius: 8px;
+    object-fit: cover;
+    background: var(--pink-50);
+    flex-shrink: 0;
+  }
+  .product-pick-filled .pp-thumb-placeholder {
+    width: 52px;
+    height: 52px;
+    border-radius: 8px;
+    background: var(--pink-50);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--pink-200);
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .product-pick-filled .pp-info { flex: 1; min-width: 0; }
+  .product-pick-filled .pp-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--pink-900);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .product-pick-filled .pp-price { font-size: 12px; color: var(--pink-400); margin-top: 2px; }
+  .product-pick-filled .pp-change {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--pink-600);
+    border: 1.5px solid #F4C0D1;
+    border-radius: 16px;
+    padding: 6px 12px;
+    cursor: pointer;
+    flex-shrink: 0;
+    background: #fff;
+    transition: all 0.15s;
+  }
+  .product-pick-filled .pp-change:hover { border-color: var(--pink-400); background: var(--pink-50); }
+
+  /* Product select modal */
+  #product-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(75,21,40,0.55);
+    backdrop-filter: blur(5px);
+    z-index: 5000;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 24px 16px;
+  }
+  #product-modal.open { display: flex; }
+  #product-modal-box {
+    background: #fff;
+    border-radius: 20px;
+    width: min(880px, 100%);
+    padding: 28px;
+    margin: auto;
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+  .modal-header h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--pink-900);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .modal-header h3 i { color: var(--pink-400); }
+  .modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: var(--pink-50);
+    color: var(--pink-600);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .modal-close:hover { background: var(--pink-100); }
+  #modal-product-grid.product-grid { grid-template-columns: repeat(3, 1fr); }
+  #modal-product-grid .product-card.selected { border-color: var(--pink-400); box-shadow: 0 0 0 2px var(--pink-100); }
+
+  @media (max-width: 720px) {
+    #modal-product-grid.product-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="logo">선물톡 <span>giftalk</span></a>
+    <nav>
+      <a href="gift-list.html">선물 목록</a>
+      <a href="wedding.html">결혼·돌잔치답례</a>
+      <a href="graduation.html">졸업선물</a>
+      <a href="holiday.html">명절선물</a>
+      <a href="gathering.html">모임선물</a>
+      <a href="celebration.html">축하선물</a>
+      <a href="contact.html">고객문의</a>
+    </nav>
+    <button class="cta-btn" onclick="window.location.href='quote.html'">견적받기</button>
+  </div>
+</header>
+
+<div class="page-banner">
+  <h1>무료 견적받기</h1>
+  <p>원하는 옵션을 선택하면 담당자가 빠르게 견적을 안내해드려요</p>
+</div>
+
+<div class="quote-wrap">
+
+  <!-- 상품 선택 -->
+  <div class="option-block">
+    <div class="option-title"><i class="ti ti-shopping-bag"></i> 상품 선택 *</div>
+    <div id="product-pick-area">
+      <div class="product-pick-box" onclick="openProductModal()">
+        <i class="ti ti-plus"></i> 상품을 선택해주세요
+      </div>
+    </div>
+  </div>
+
+  <!-- 수량별 단가 -->
+  <div class="price-tiers-box" id="tiers-box" style="display:none;">
+    <h4>✦ 수량별 단가</h4>
+    <div id="tiers-list"></div>
+  </div>
+
+  <!-- 수량 -->
+  <div class="option-block">
+    <div class="option-title"><i class="ti ti-hash"></i> 수량</div>
+    <div class="qty-wrap">
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="changeQty(-1)">−</button>
+        <input type="number" id="qty-input" value="1" min="1" oninput="refreshAll()">
+        <button class="qty-btn" onclick="changeQty(1)">+</button>
+      </div>
+      <div class="qty-note" id="qty-note">상품을 선택하면 최소 주문 수량이 표시돼요</div>
+    </div>
+  </div>
+
+  <!-- 포장 유무 / 포장지 선택 -->
+  <div class="option-block">
+    <div class="option-header">
+      <div class="option-title"><i class="ti ti-box"></i> 포장 유무</div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="wrap-toggle" onchange="onWrapToggle()">
+        <span class="toggle-track"></span>
+      </label>
+    </div>
+    <div id="wrap-opts" style="display:none;">
+      <div class="wrap-grid" id="wrap-grid"></div>
+    </div>
+  </div>
+
+  <!-- 리본 추가 -->
+  <div class="option-block">
+    <div class="option-header">
+      <div class="option-title"><i class="ti ti-ribbon"></i> 리본 추가</div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="ribbon-toggle" onchange="refreshSummary()">
+        <span class="toggle-track"></span>
+      </label>
+    </div>
+  </div>
+
+  <!-- 레터 동봉 -->
+  <div class="option-block">
+    <div class="option-header">
+      <div class="option-title"><i class="ti ti-mail"></i> 레터 동봉</div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="letter-toggle" onchange="onLetterToggle()">
+        <span class="toggle-track"></span>
+      </label>
+    </div>
+    <div class="print-area" id="letter-area" style="display:none;">
+      <textarea class="print-textarea" id="letter-text" maxlength="100"
+        placeholder="동봉할 메시지를 입력하세요 (최대 100자)"
+        oninput="document.getElementById('letter-cnt').textContent=this.value.length;refreshSummary()"></textarea>
+      <div class="print-counter"><span id="letter-cnt">0</span> / 100자</div>
+    </div>
+  </div>
+
+  <!-- 스티커 선택 -->
+  <div class="option-block">
+    <div class="option-title"><i class="ti ti-sticker"></i> 스티커 선택</div>
+    <div class="wrap-grid" id="sticker-grid"></div>
+  </div>
+
+  <!-- 배송지 -->
+  <div class="option-block">
+    <div class="option-title"><i class="ti ti-map-pin"></i> 배송지 *</div>
+    <div class="form-group">
+      <input type="text" id="q-address" placeholder="받으실 주소를 입력해주세요" oninput="refreshSummary()">
+    </div>
+  </div>
+
+  <!-- 연락처 -->
+  <div class="option-block">
+    <div class="option-title"><i class="ti ti-phone"></i> 연락처 *</div>
+    <div class="form-group">
+      <input type="tel" id="q-contact" placeholder="010-0000-0000" oninput="refreshSummary()">
+    </div>
+  </div>
+
+  <!-- 추가요청사항 -->
+  <div class="option-block">
+    <div class="option-title"><i class="ti ti-message-2"></i> 추가요청사항</div>
+    <div class="form-group">
+      <textarea id="q-request" placeholder="추가로 요청하실 사항이 있다면 입력해주세요"></textarea>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="price-summary">
+    <div class="sum-row"><span>상품</span><span id="s-product">선택 안 함</span></div>
+    <div class="sum-row"><span>수량</span><span id="s-qty">-</span></div>
+    <div class="sum-row"><span>단가</span><span id="s-unit">-</span></div>
+    <div class="sum-row"><span>포장</span><span id="s-wrap">선택 안 함</span></div>
+    <div class="sum-row"><span>리본</span><span id="s-ribbon">선택 안 함</span></div>
+    <div class="sum-row"><span>레터 동봉</span><span id="s-letter">선택 안 함</span></div>
+    <div class="sum-row"><span>스티커</span><span id="s-sticker">선택 안 함</span></div>
+    <hr class="sum-divider">
+    <div class="sum-total"><span>예상 금액</span><span class="total-amt" id="s-total">-</span></div>
+    <div class="sum-note">* VAT 별도 / 최종 금액은 담당자 확인 후 확정됩니다</div>
+  </div>
+
+  <button class="btn-inquire" onclick="submitQuote()">
+    <i class="ti ti-send"></i> 무료 견적 신청하기
+  </button>
+
+</div>
+
+<!-- 상품 선택 모달 -->
+<div id="product-modal" onclick="if(event.target===this)closeProductModal()">
+  <div id="product-modal-box">
+    <div class="modal-header">
+      <h3><i class="ti ti-shopping-bag"></i> 상품 선택</h3>
+      <button class="modal-close" onclick="closeProductModal()">×</button>
+    </div>
+    <div id="modal-product-grid" class="product-grid"></div>
+  </div>
+</div>
+
+<footer>
+  © 2026 선물톡 (giftalk). 대외비 시안 — 실제 상호·연락처는 추후 확정 예정입니다.
+</footer>
+
+<script src="common.js"></script>
+<script>
+var WRAP_OPTIONS = [
+  { icon: 'ti-package', name: '크라프트 포장지' },
+  { icon: 'ti-gift', name: '고급 실크 포장지' },
+  { icon: 'ti-leaf', name: '한지 포장지' },
+  { icon: 'ti-eye', name: '투명 OPP 포장' }
+];
+var STICKER_OPTIONS = [
+  { icon: 'ti-circle-off', name: '선택 안 함' },
+  { icon: 'ti-ribbon', name: '리본 스티커' },
+  { icon: 'ti-heart', name: '하트 스티커' },
+  { icon: 'ti-flower', name: '꽃 스티커' }
+];
+
+var selectedProduct = null;
+var selectedWrapping = null;
+var selectedSticker = STICKER_OPTIONS[0].name;
+
+function tierLabel(t) {
+  return t.max ? (t.min + '~' + t.max + '개') : (t.min + '개 이상');
+}
+
+function init() {
+  renderWrapGrid();
+  renderStickerGrid();
+  renderModalProducts();
+
+  var params = new URLSearchParams(window.location.search);
+  var id = params.get('id');
+  if (id) {
+    var p = getProductById(id);
+    if (p) selectProduct(p.id);
+  }
+
+  refreshAll();
+}
+
+/* ===== Product picker ===== */
+function renderModalProducts() {
+  var products = getProducts();
+  var grid = document.getElementById('modal-product-grid');
+  if (products.length === 0) {
+    grid.innerHTML =
+      '<div class="empty-state">' +
+        '<i class="ti ti-shopping-bag"></i>' +
+        '<p>등록된 상품이 없습니다.</p>' +
+      '</div>';
+    return;
+  }
+  grid.innerHTML = products.map(function(p) {
+    var imgHtml = p.image
+      ? '<img src="' + escapeHtml(p.image) + '" alt="' + escapeHtml(p.name) + '" ' +
+        'onerror="this.parentNode.innerHTML=\'<div class=\\\'img-placeholder\\\'><i class=\\\'ti ti-photo\\\'></i></div>\'">'
+      : '<div class="img-placeholder"><i class="ti ti-photo"></i></div>';
+    var startPrice = getStartingPrice(p);
+    return '<div class="product-card' + (selectedProduct && selectedProduct.id === p.id ? ' selected' : '') + '" ' +
+      'id="modal-card-' + p.id + '" onclick="selectProduct(\'' + p.id + '\')">' +
+      '<div class="product-img-wrap">' + imgHtml + '</div>' +
+      '<div class="product-info">' +
+        '<div class="product-name">' + escapeHtml(p.name) + '</div>' +
+        '<div class="product-price">' + (startPrice ? startPrice.toLocaleString() + '원~' : '가격 문의') + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function openProductModal() {
+  document.getElementById('product-modal').classList.add('open');
+}
+
+function closeProductModal() {
+  document.getElementById('product-modal').classList.remove('open');
+}
+
+function selectProduct(id) {
+  var p = getProductById(id);
+  if (!p) return;
+  selectedProduct = p;
+
+  var tiers = (p.priceTiers || []).slice().sort(function(a, b) { return a.min - b.min; });
+  var minQty = tiers.length ? Number(tiers[0].min) : 1;
+
+  var imgHtml = p.image
+    ? '<img class="pp-thumb" src="' + escapeHtml(p.image) + '" alt="' + escapeHtml(p.name) + '" ' +
+      'onerror="this.outerHTML=\'<div class=\\\'pp-thumb-placeholder\\\'><i class=\\\'ti ti-photo\\\'></i></div>\'">'
+    : '<div class="pp-thumb-placeholder"><i class="ti ti-photo"></i></div>';
+  var startPrice = getStartingPrice(p);
+
+  document.getElementById('product-pick-area').innerHTML =
+    '<div class="product-pick-filled">' +
+      imgHtml +
+      '<div class="pp-info">' +
+        '<div class="pp-name">' + escapeHtml(p.name) + '</div>' +
+        '<div class="pp-price">' + (startPrice ? startPrice.toLocaleString() + '원~' : '가격 문의') + '</div>' +
+      '</div>' +
+      '<button type="button" class="pp-change" onclick="openProductModal()">변경</button>' +
+    '</div>';
+
+  var tiersHtml = tiers.length
+    ? tiers.map(function(t) {
+        return '<div class="tier-row-display" id="tier-' + t.min + '">' +
+          '<span class="tier-range">' + tierLabel(t) + '</span>' +
+          '<span class="tier-unit">' + Number(t.price).toLocaleString() + '원/개</span>' +
+        '</div>';
+      }).join('')
+    : '<div class="tier-row-display"><span>가격 문의</span></div>';
+  document.getElementById('tiers-list').innerHTML = tiersHtml;
+  document.getElementById('tiers-box').style.display = '';
+
+  var qtyEl = document.getElementById('qty-input');
+  qtyEl.min = minQty;
+  qtyEl.value = minQty;
+  document.getElementById('qty-note').textContent = '최소 주문 수량: ' + minQty + '개';
+
+  closeProductModal();
+  renderModalProducts();
+  refreshAll();
+}
+
+/* ===== Quantity ===== */
+function changeQty(delta) {
+  var el = document.getElementById('qty-input');
+  var min = parseInt(el.min) || 1;
+  el.value = Math.max(min, (parseInt(el.value) || min) + delta);
+  refreshAll();
+}
+
+/* ===== Wrapping ===== */
+function renderWrapGrid() {
+  document.getElementById('wrap-grid').innerHTML = WRAP_OPTIONS.map(function(w) {
+    return '<div class="wrap-card" onclick="selectWrap(this,\'' + w.name + '\')">' +
+      '<i class="ti ' + w.icon + '"></i>' + w.name + '</div>';
+  }).join('');
+}
+
+function onWrapToggle() {
+  var on = document.getElementById('wrap-toggle').checked;
+  document.getElementById('wrap-opts').style.display = on ? '' : 'none';
+  if (!on) {
+    selectedWrapping = null;
+    document.querySelectorAll('#wrap-grid .wrap-card').forEach(function(c) { c.classList.remove('selected'); });
+  }
+  refreshSummary();
+}
+
+function selectWrap(el, name) {
+  document.querySelectorAll('#wrap-grid .wrap-card').forEach(function(c) { c.classList.remove('selected'); });
+  el.classList.add('selected');
+  selectedWrapping = name;
+  refreshSummary();
+}
+
+/* ===== Sticker ===== */
+function renderStickerGrid() {
+  document.getElementById('sticker-grid').innerHTML = STICKER_OPTIONS.map(function(s, i) {
+    return '<div class="wrap-card' + (i === 0 ? ' selected' : '') + '" onclick="selectSticker(this,\'' + s.name + '\')">' +
+      '<i class="ti ' + s.icon + '"></i>' + s.name + '</div>';
+  }).join('');
+}
+
+function selectSticker(el, name) {
+  document.querySelectorAll('#sticker-grid .wrap-card').forEach(function(c) { c.classList.remove('selected'); });
+  el.classList.add('selected');
+  selectedSticker = name;
+  refreshSummary();
+}
+
+/* ===== Letter ===== */
+function onLetterToggle() {
+  var on = document.getElementById('letter-toggle').checked;
+  document.getElementById('letter-area').style.display = on ? '' : 'none';
+  refreshSummary();
+}
+
+/* ===== Refresh ===== */
+function refreshAll() {
+  var qty = parseInt(document.getElementById('qty-input').value) || 0;
+  document.getElementById('s-qty').textContent = qty + '개';
+
+  if (!selectedProduct) {
+    document.getElementById('s-unit').textContent = '-';
+    document.getElementById('s-total').textContent = '견적 문의';
+    refreshSummary();
+    return;
+  }
+
+  var tiers = (selectedProduct.priceTiers || []).slice().sort(function(a, b) { return a.min - b.min; });
+  tiers.forEach(function(t) {
+    var el = document.getElementById('tier-' + t.min);
+    if (!el) return;
+    var inRange = qty >= Number(t.min) && (!t.max || qty <= Number(t.max));
+    el.classList.toggle('active-tier', inRange);
+  });
+
+  var unitPrice = null;
+  for (var i = 0; i < tiers.length; i++) {
+    var t = tiers[i];
+    if (qty >= Number(t.min) && (!t.max || qty <= Number(t.max))) {
+      unitPrice = Number(t.price);
+      break;
+    }
+  }
+
+  document.getElementById('s-unit').textContent = unitPrice !== null ? unitPrice.toLocaleString() + '원/개' : '범위 외';
+  document.getElementById('s-total').textContent = unitPrice !== null ? (unitPrice * qty).toLocaleString() + '원~' : '견적 문의';
+
+  refreshSummary();
+}
+
+function refreshSummary() {
+  document.getElementById('s-product').textContent = selectedProduct ? selectedProduct.name : '선택 안 함';
+
+  var wOn = document.getElementById('wrap-toggle').checked;
+  document.getElementById('s-wrap').textContent = wOn ? (selectedWrapping || '포장지 미선택') : '선택 안 함';
+
+  var rOn = document.getElementById('ribbon-toggle').checked;
+  document.getElementById('s-ribbon').textContent = rOn ? '추가' : '선택 안 함';
+
+  var lOn = document.getElementById('letter-toggle').checked;
+  var letterTxt = document.getElementById('letter-text').value.trim();
+  document.getElementById('s-letter').textContent = lOn ? (letterTxt || '문구 미입력') : '선택 안 함';
+
+  document.getElementById('s-sticker').textContent = selectedSticker;
+}
+
+/* ===== Submit ===== */
+function submitQuote() {
+  var address = document.getElementById('q-address').value.trim();
+  var contact = document.getElementById('q-contact').value.trim();
+
+  if (!selectedProduct) { alert('상품을 선택해주세요.'); return; }
+  if (!address) { alert('배송지를 입력해주세요.'); return; }
+  if (!contact) { alert('연락처를 입력해주세요.'); return; }
+
+  alert('견적 요청이 접수되었습니다.\n담당자가 빠른 시일 내에 연락드리겠습니다.');
+}
+
+init();
+</script>
+</body>
+</html>

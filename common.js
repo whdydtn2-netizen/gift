@@ -4,7 +4,8 @@ const CATEGORY_LABELS = {
   wedding: '결혼·돌잔치답례',
   graduation: '졸업선물',
   holiday: '명절선물',
-  gathering: '모임선물'
+  gathering: '모임선물',
+  celebration: '축하선물'
 };
 
 function getProducts() {
