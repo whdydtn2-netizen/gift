@@ -134,10 +134,14 @@ function refreshCartBadge() {
     link.style.cssText = 'position:relative;display:inline-flex;align-items:center;justify-content:center;' +
       'width:38px;height:38px;border-radius:50%;background:var(--pink-50);color:var(--pink-600);' +
       'margin-right:8px;flex-shrink:0;';
-    link.innerHTML = '<i class="ti ti-shopping-cart" style="font-size:18px;"></i>' +
+    link.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+      '<circle cx="9" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle>' +
+      '<path d="M2.5 3h2l2.6 12.6a2 2 0 0 0 2 1.6h8.8a2 2 0 0 0 2-1.6L22 7H5.2"></path>' +
+      '</svg>' +
       '<span id="cart-badge" style="display:none;position:absolute;top:-4px;right:-4px;' +
       'background:var(--pink-400);color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;' +
-      'border-radius:8px;align-items:center;justify-content:center;padding:0 3px;"></span>';
+      'border-radius:8px;align-items:center;justify-content:center;padding:0 3px;line-height:1;"></span>';
     ctaBtn.parentNode.insertBefore(link, ctaBtn);
     refreshCartBadge();
   }
