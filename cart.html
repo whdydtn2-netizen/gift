@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>장바구니 — 선물톡</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
+<link rel="stylesheet" href="common.css">
+<style>
+  .cart-wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 36px 24px 60px;
+  }
+
+  /* ===== Cart item ===== */
+  .cart-item {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #F6E3EA;
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .ci-thumb {
+    width: 72px;
+    height: 72px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--pink-50);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--pink-200);
+    font-size: 24px;
+  }
+  .ci-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .ci-info { flex: 1; min-width: 0; }
+  .ci-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--pink-900);
+    margin-bottom: 3px;
+  }
+  .ci-opts { font-size: 12px; color: var(--pink-600); margin-bottom: 3px; }
+  .ci-letter {
+    font-size: 12px;
+    color: var(--pink-400);
+    margin-bottom: 6px;
+    font-style: italic;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ci-qty-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 6px;
+  }
+  .ci-qty-ctrl {
+    display: inline-flex;
+    align-items: center;
+    border: 1.5px solid #F4C0D1;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .ci-qty-btn {
+    width: 30px;
+    height: 30px;
+    border: none;
+    background: var(--pink-50);
+    color: var(--pink-600);
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ci-qty-btn:hover { background: var(--pink-100); }
+  .ci-qty-val {
+    display: inline-block;
+    width: 34px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--pink-900);
+  }
+  .ci-price { font-size: 14px; font-weight: 700; color: var(--pink-400); }
+  .ci-remove {
+    border: none;
+    background: none;
+    color: var(--pink-300);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 6px;
+    flex-shrink: 0;
+    transition: color 0.15s;
+  }
+  .ci-remove:hover { color: var(--pink-600); }
+
+  /* ===== Option blocks (checkout form) ===== */
+  .option-block {
+    border: 1px solid #F6E3EA;
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    background: #fff;
+  }
+  .option-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--pink-900);
+  }
+  .option-title i { color: var(--pink-400); font-size: 18px; }
+  .form-group { margin-top: 14px; }
+  .form-group:first-child { margin-top: 0; }
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid #F4C0D1;
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--ink);
+    background: #fff;
+    outline: none;
+    transition: border-color 0.15s;
+    font-family: inherit;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus { border-color: var(--pink-400); }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+
+  /* ===== Price summary ===== */
+  .price-summary {
+    background: var(--cream);
+    border: 1.5px solid #F4C0D1;
+    border-radius: 16px;
+    padding: 20px;
+    margin: 6px 0 20px;
+  }
+  .sum-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: var(--pink-700);
+    padding: 5px 0;
+  }
+  .sum-row span:last-child { font-weight: 600; color: var(--pink-900); }
+  .sum-divider { border: none; border-top: 1px solid #F4C0D1; margin: 10px 0; }
+  .sum-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--pink-900);
+    padding-top: 4px;
+  }
+  .sum-total .total-amt { color: var(--pink-400); }
+  .sum-note { font-size: 11px; color: var(--pink-400); margin-top: 6px; text-align: right; }
+
+  .btn-inquire {
+    width: 100%;
+    background: var(--pink-400);
+    color: #fff;
+    border: none;
+    padding: 16px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-inquire:hover { background: var(--pink-600); transform: translateY(-1px); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="logo">선물톡 <span>giftalk</span></a>
+    <nav>
+      <a href="gift-list.html">선물 목록</a>
+      <a href="wedding.html">결혼·돌잔치답례</a>
+      <a href="graduation.html">졸업선물</a>
+      <a href="holiday.html">명절선물</a>
+      <a href="gathering.html">모임선물</a>
+      <a href="celebration.html">축하선물</a>
+      <a href="contact.html">고객문의</a>
+    </nav>
+    <button class="cta-btn" onclick="window.location.href='quote.html'">견적받기</button>
+  </div>
+</header>
+
+<div class="page-banner">
+  <h1>장바구니</h1>
+  <p>담아두신 상품을 확인하고 배송지·연락처를 입력해 주문을 요청하세요</p>
+</div>
+
+<div class="cart-wrap" id="cart-root"></div>
+
+<footer>
+  © 2026 선물톡 (giftalk). 대외비 시안 — 실제 상호·연락처는 추후 확정 예정입니다.
+</footer>
+
+<script src="common.js"></script>
+<script>
+function optsSummary(item) {
+  var parts = [];
+  if (item.wrapping) parts.push('포장: ' + item.wrapping);
+  if (item.ribbon) parts.push('리본 추가');
+  if (item.sticker && item.sticker !== '선택 안 함') parts.push('스티커: ' + item.sticker);
+  return parts.length ? parts.join(' · ') : '옵션 없음';
+}
+
+function renderCart() {
+  var items = getCart();
+  var root = document.getElementById('cart-root');
+
+  if (!items.length) {
+    root.innerHTML =
+      '<div class="empty-state">' +
+        '<i class="ti ti-shopping-cart"></i>' +
+        '<p>장바구니가 비어 있습니다.</p>' +
+        '<small>마음에 드는 선물을 담아보세요.</small><br>' +
+        '<a href="gift-list.html" class="btn-inquire" style="display:inline-flex;width:auto;padding:12px 28px;margin-top:16px;">' +
+          '<i class="ti ti-arrow-left"></i> 선물 둘러보기</a>' +
+      '</div>';
+    return;
+  }
+
+  var draft = getCheckoutDraft();
+  var totalQty = 0;
+  var totalPrice = 0;
+  var hasUnknown = false;
+
+  var itemsHtml = items.map(function(item) {
+    var qty = Number(item.qty) || 0;
+    var unit = getUnitPriceForQty(item.priceTiers, qty);
+    totalQty += qty;
+    if (unit !== null) { totalPrice += unit * qty; } else { hasUnknown = true; }
+
+    var thumbHtml = item.productImage
+      ? '<img src="' + escapeHtml(item.productImage) + '" alt="" onerror="this.parentNode.innerHTML=\'<i class=\\\'ti ti-photo\\\'></i>\'">'
+      : '<i class="ti ti-photo"></i>';
+
+    return '<div class="cart-item">' +
+      '<div class="ci-thumb">' + thumbHtml + '</div>' +
+      '<div class="ci-info">' +
+        '<div class="ci-name">' + escapeHtml(item.productName || '상품') + '</div>' +
+        '<div class="ci-opts">' + escapeHtml(optsSummary(item)) + '</div>' +
+        (item.letterText ? '<div class="ci-letter">레터: "' + escapeHtml(item.letterText) + '"</div>' : '') +
+        '<div class="ci-qty-row">' +
+          '<div class="ci-qty-ctrl">' +
+            '<button type="button" class="ci-qty-btn" onclick="changeCartQty(\'' + item.id + '\',-1)">−</button>' +
+            '<span class="ci-qty-val">' + qty + '개</span>' +
+            '<button type="button" class="ci-qty-btn" onclick="changeCartQty(\'' + item.id + '\',1)">+</button>' +
+          '</div>' +
+          '<div class="ci-price">' + (unit !== null ? (unit * qty).toLocaleString() + '원' : '견적 문의') + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<button type="button" class="ci-remove" onclick="removeCartItem(\'' + item.id + '\')"><i class="ti ti-trash"></i></button>' +
+    '</div>';
+  }).join('');
+
+  root.innerHTML =
+    itemsHtml +
+    '<div class="price-summary">' +
+      '<div class="sum-row"><span>총 수량</span><span>' + totalQty + '개</span></div>' +
+      '<hr class="sum-divider">' +
+      '<div class="sum-total"><span>총 예상 금액</span><span class="total-amt">' +
+        totalPrice.toLocaleString() + (hasUnknown ? '원~' : '원') + '</span></div>' +
+      '<div class="sum-note">* VAT 별도 / 최종 금액은 담당자 확인 후 확정됩니다</div>' +
+    '</div>' +
+    '<div class="option-block">' +
+      '<div class="option-title"><i class="ti ti-map-pin"></i> 배송지 *</div>' +
+      '<div class="form-group">' +
+        '<input type="text" id="co-address" placeholder="받으실 주소를 입력해주세요" value="' + escapeHtml(draft.address || '') + '">' +
+      '</div>' +
+    '</div>' +
+    '<div class="option-block">' +
+      '<div class="option-title"><i class="ti ti-phone"></i> 연락처 *</div>' +
+      '<div class="form-group">' +
+        '<input type="tel" id="co-contact" placeholder="010-0000-0000" value="' + escapeHtml(draft.contact || '') + '">' +
+      '</div>' +
+    '</div>' +
+    '<div class="option-block">' +
+      '<div class="option-title"><i class="ti ti-message-2"></i> 추가요청사항</div>' +
+      '<div class="form-group">' +
+        '<textarea id="co-request" placeholder="추가로 요청하실 사항이 있다면 입력해주세요">' + escapeHtml(draft.request || '') + '</textarea>' +
+      '</div>' +
+    '</div>' +
+    '<button class="btn-inquire" onclick="submitCartOrder()">' +
+      '<i class="ti ti-send"></i> 주문 요청하기' +
+    '</button>';
+}
+
+function changeCartQty(id, delta) {
+  var item = getCart().find(function(i) { return i.id === id; });
+  if (!item) return;
+  var newQty = Math.max(1, (Number(item.qty) || 1) + delta);
+  updateCartItemQty(id, newQty);
+  renderCart();
+}
+
+function removeCartItem(id) {
+  removeFromCart(id);
+  renderCart();
+}
+
+function submitCartOrder() {
+  var address = document.getElementById('co-address').value.trim();
+  var contact = document.getElementById('co-contact').value.trim();
+
+  if (!address) { alert('배송지를 입력해주세요.'); return; }
+  if (!contact) { alert('연락처를 입력해주세요.'); return; }
+
+  alert('주문 요청이 접수되었습니다.\n담당자가 빠른 시일 내에 연락드리겠습니다.');
+  clearCart();
+  clearCheckoutDraft();
+  renderCart();
+}
+
+renderCart();
+</script>
+</body>
+</html>

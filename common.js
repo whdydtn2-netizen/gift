@@ -1,4 +1,6 @@
 const GIFTALK_KEY = 'giftalk_products';
+const CART_KEY = 'giftalk_cart';
+const CHECKOUT_DRAFT_KEY = 'giftalk_checkout_draft';
 
 const CATEGORY_LABELS = {
   wedding: '결혼·돌잔치답례',
@@ -46,6 +48,100 @@ function getProductsByCategory(category) {
     return getProductCategories(p).indexOf(category) !== -1;
   });
 }
+
+// ===== Cart =====
+function getCart() {
+  try { return JSON.parse(localStorage.getItem(CART_KEY) || '[]'); }
+  catch(e) { return []; }
+}
+
+function saveCart(items) {
+  localStorage.setItem(CART_KEY, JSON.stringify(items));
+  refreshCartBadge();
+}
+
+function addToCart(item) {
+  const items = getCart();
+  item.id = Date.now().toString() + Math.random().toString(36).slice(2, 5);
+  items.push(item);
+  saveCart(items);
+  return item;
+}
+
+function removeFromCart(id) {
+  saveCart(getCart().filter(i => i.id !== id));
+}
+
+function updateCartItemQty(id, qty) {
+  saveCart(getCart().map(i => i.id === id ? Object.assign({}, i, { qty: qty }) : i));
+}
+
+function clearCart() {
+  saveCart([]);
+}
+
+function getCartCount() {
+  return getCart().reduce((sum, i) => sum + (Number(i.qty) || 0), 0);
+}
+
+function getUnitPriceForQty(priceTiers, qty) {
+  const tiers = (priceTiers || []).slice().sort((a, b) => a.min - b.min);
+  for (let i = 0; i < tiers.length; i++) {
+    const t = tiers[i];
+    if (qty >= Number(t.min) && (!t.max || qty <= Number(t.max))) return Number(t.price);
+  }
+  return null;
+}
+
+// ===== Checkout draft (address/contact/request typed while shopping) =====
+function saveCheckoutDraft(draft) {
+  localStorage.setItem(CHECKOUT_DRAFT_KEY, JSON.stringify(draft));
+}
+
+function getCheckoutDraft() {
+  try { return JSON.parse(localStorage.getItem(CHECKOUT_DRAFT_KEY) || '{}'); }
+  catch(e) { return {}; }
+}
+
+function clearCheckoutDraft() {
+  localStorage.removeItem(CHECKOUT_DRAFT_KEY);
+}
+
+// ===== Cart widget (header icon + badge) =====
+function refreshCartBadge() {
+  var badge = document.getElementById('cart-badge');
+  if (!badge) return;
+  var count = getCartCount();
+  badge.textContent = count;
+  badge.style.display = count > 0 ? 'flex' : 'none';
+}
+
+(function() {
+  if (typeof window === 'undefined') return;
+  if (window.location.pathname.indexOf('admin.html') !== -1) return;
+  function injectCartWidget() {
+    var ctaBtn = document.querySelector('.cta-btn');
+    if (!ctaBtn || document.getElementById('cart-widget')) return;
+    var link = document.createElement('a');
+    link.href = 'cart.html';
+    link.id = 'cart-widget';
+    link.title = '장바구니';
+    link.style.cssText = 'position:relative;display:inline-flex;align-items:center;justify-content:center;' +
+      'width:38px;height:38px;border-radius:50%;background:var(--pink-50);color:var(--pink-600);' +
+      'margin-right:8px;flex-shrink:0;';
+    link.innerHTML = '<i class="ti ti-shopping-cart" style="font-size:18px;"></i>' +
+      '<span id="cart-badge" style="display:none;position:absolute;top:-4px;right:-4px;' +
+      'background:var(--pink-400);color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;' +
+      'border-radius:8px;align-items:center;justify-content:center;padding:0 3px;"></span>';
+    ctaBtn.parentNode.insertBefore(link, ctaBtn);
+    refreshCartBadge();
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectCartWidget);
+  } else {
+    injectCartWidget();
+  }
+})();
 
 function escapeHtml(str) {
   return String(str)
