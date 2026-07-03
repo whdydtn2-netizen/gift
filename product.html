@@ -317,6 +317,7 @@
 <script>
 var product = null;
 var selectedWrapping = null;
+var selectedSticker = '선택 안 함';
 
 function init() {
   var params = new URLSearchParams(window.location.search);
@@ -375,7 +376,7 @@ function render() {
           '</label>' +
         '</div>' +
         '<div id="wrap-opts" style="display:none;">' +
-          '<div class="wrap-grid">' +
+          '<div class="wrap-grid" id="wrap-grid">' +
             wraps.map(function(w) {
               return '<div class="wrap-card" onclick="selectWrap(this,\'' + w.name + '\')">' +
                 '<i class="ti ' + w.icon + '"></i>' + w.name + '</div>';
@@ -406,11 +407,75 @@ function render() {
       '</div>';
   }
 
+  /* ---- ribbon block ---- */
+  var ribbonHtml = '';
+  if (product.hasRibbon) {
+    ribbonHtml =
+      '<div class="option-block">' +
+        '<div class="option-header">' +
+          '<div class="option-title"><i class="ti ti-ribbon"></i> 리본 추가</div>' +
+          '<label class="toggle-switch">' +
+            '<input type="checkbox" id="ribbon-toggle" onchange="refreshSummary()">' +
+            '<span class="toggle-track"></span>' +
+          '</label>' +
+        '</div>' +
+      '</div>';
+  }
+
+  /* ---- letter block ---- */
+  var letterHtml = '';
+  if (product.hasLetter) {
+    letterHtml =
+      '<div class="option-block">' +
+        '<div class="option-header">' +
+          '<div class="option-title"><i class="ti ti-mail"></i> 레터 동봉</div>' +
+          '<label class="toggle-switch">' +
+            '<input type="checkbox" id="letter-toggle" onchange="onLetterToggle()">' +
+            '<span class="toggle-track"></span>' +
+          '</label>' +
+        '</div>' +
+        '<div class="print-area" id="letter-area" style="display:none;">' +
+          '<textarea class="print-textarea" id="letter-text" maxlength="100" ' +
+            'placeholder="동봉할 메시지를 입력하세요 (최대 100자)" ' +
+            'oninput="document.getElementById(\'letter-cnt\').textContent=this.value.length;refreshSummary()"></textarea>' +
+          '<div class="print-counter"><span id="letter-cnt">0</span> / 100자</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  /* ---- sticker block ---- */
+  var stickerHtml = '';
+  if (product.hasSticker) {
+    var stickers = [
+      { icon: 'ti-circle-off', name: '선택 안 함' },
+      { icon: 'ti-ribbon', name: '리본 스티커' },
+      { icon: 'ti-heart', name: '하트 스티커' },
+      { icon: 'ti-flower', name: '꽃 스티커' }
+    ];
+    stickerHtml =
+      '<div class="option-block">' +
+        '<div class="option-title"><i class="ti ti-sticker"></i> 스티커 선택</div>' +
+        '<div class="wrap-grid" id="sticker-grid">' +
+          stickers.map(function(s, i) {
+            return '<div class="wrap-card' + (i === 0 ? ' selected' : '') + '" onclick="selectSticker(this,\'' + s.name + '\')">' +
+              '<i class="ti ' + s.icon + '"></i>' + s.name + '</div>';
+          }).join('') +
+        '</div>' +
+      '</div>';
+    selectedSticker = stickers[0].name;
+  }
+
   /* ---- summary rows ---- */
   var sumWrapRow = product.hasWrapping
     ? '<div class="sum-row"><span>포장</span><span id="s-wrap">선택 안 함</span></div>' : '';
   var sumPrintRow = product.hasPrint
     ? '<div class="sum-row"><span>인쇄 문구</span><span id="s-print">선택 안 함</span></div>' : '';
+  var sumRibbonRow = product.hasRibbon
+    ? '<div class="sum-row"><span>리본</span><span id="s-ribbon">선택 안 함</span></div>' : '';
+  var sumLetterRow = product.hasLetter
+    ? '<div class="sum-row"><span>레터 동봉</span><span id="s-letter">선택 안 함</span></div>' : '';
+  var sumStickerRow = product.hasSticker
+    ? '<div class="sum-row"><span>스티커</span><span id="s-sticker">' + escapeHtml(selectedSticker) + '</span></div>' : '';
 
   /* ---- image ---- */
   var imgHtml = product.image
@@ -450,13 +515,16 @@ function render() {
         '</div>' +
 
         wrappingHtml +
+        ribbonHtml +
+        letterHtml +
+        stickerHtml +
         printHtml +
 
         /* Summary */
         '<div class="price-summary">' +
           '<div class="sum-row"><span>수량</span><span id="s-qty">-</span></div>' +
           '<div class="sum-row"><span>단가</span><span id="s-unit">-</span></div>' +
-          sumWrapRow + sumPrintRow +
+          sumWrapRow + sumRibbonRow + sumLetterRow + sumStickerRow + sumPrintRow +
           '<hr class="sum-divider">' +
           '<div class="sum-total"><span>예상 금액</span><span class="total-amt" id="s-total">-</span></div>' +
           '<div class="sum-note">* VAT 별도 / 최종 금액은 담당자 확인 후 확정됩니다</div>' +
@@ -485,15 +553,30 @@ function onWrapToggle() {
   document.getElementById('wrap-opts').style.display = on ? '' : 'none';
   if (!on) {
     selectedWrapping = null;
-    document.querySelectorAll('.wrap-card').forEach(function(c) { c.classList.remove('selected'); });
+    document.querySelectorAll('#wrap-grid .wrap-card').forEach(function(c) { c.classList.remove('selected'); });
   }
   refreshSummary();
 }
 
 function selectWrap(el, name) {
-  document.querySelectorAll('.wrap-card').forEach(function(c) { c.classList.remove('selected'); });
+  document.querySelectorAll('#wrap-grid .wrap-card').forEach(function(c) { c.classList.remove('selected'); });
   el.classList.add('selected');
   selectedWrapping = name;
+  refreshSummary();
+}
+
+/* ===== Sticker ===== */
+function selectSticker(el, name) {
+  document.querySelectorAll('#sticker-grid .wrap-card').forEach(function(c) { c.classList.remove('selected'); });
+  el.classList.add('selected');
+  selectedSticker = name;
+  refreshSummary();
+}
+
+/* ===== Letter ===== */
+function onLetterToggle() {
+  var on = document.getElementById('letter-toggle').checked;
+  document.getElementById('letter-area').style.display = on ? '' : 'none';
   refreshSummary();
 }
 
@@ -539,6 +622,9 @@ function refreshAll() {
 function refreshSummary() {
   var wEl = document.getElementById('s-wrap');
   var pEl = document.getElementById('s-print');
+  var rEl = document.getElementById('s-ribbon');
+  var lEl = document.getElementById('s-letter');
+  var sEl = document.getElementById('s-sticker');
 
   if (wEl) {
     var wOn = document.getElementById('wrap-toggle') && document.getElementById('wrap-toggle').checked;
@@ -548,6 +634,18 @@ function refreshSummary() {
     var pOn = document.getElementById('print-toggle') && document.getElementById('print-toggle').checked;
     var txt = document.getElementById('print-text') ? document.getElementById('print-text').value.trim() : '';
     pEl.textContent = pOn ? (txt || '문구 미입력') : '선택 안 함';
+  }
+  if (rEl) {
+    var rOn = document.getElementById('ribbon-toggle') && document.getElementById('ribbon-toggle').checked;
+    rEl.textContent = rOn ? '추가' : '선택 안 함';
+  }
+  if (lEl) {
+    var lOn = document.getElementById('letter-toggle') && document.getElementById('letter-toggle').checked;
+    var letterTxt = document.getElementById('letter-text') ? document.getElementById('letter-text').value.trim() : '';
+    lEl.textContent = lOn ? (letterTxt || '문구 미입력') : '선택 안 함';
+  }
+  if (sEl) {
+    sEl.textContent = selectedSticker;
   }
 }
 

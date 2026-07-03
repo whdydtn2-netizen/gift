@@ -555,7 +555,10 @@
     <div class="form-group">
       <label>제공 옵션</label>
       <div class="opt-checks">
-        <label class="opt-check"><input type="checkbox" id="p-has-wrapping"> <i class="ti ti-box"></i> 포장 옵션</label>
+        <label class="opt-check"><input type="checkbox" id="p-has-wrapping"> <i class="ti ti-box"></i> 포장 유무</label>
+        <label class="opt-check"><input type="checkbox" id="p-has-ribbon"> <i class="ti ti-ribbon"></i> 리본 추가</label>
+        <label class="opt-check"><input type="checkbox" id="p-has-letter"> <i class="ti ti-mail"></i> 레터 동봉</label>
+        <label class="opt-check"><input type="checkbox" id="p-has-sticker"> <i class="ti ti-sticker"></i> 스티커 선택</label>
       </div>
     </div>
 
@@ -629,7 +632,10 @@
     <div class="form-group">
       <label>제공 옵션</label>
       <div class="opt-checks">
-        <label class="opt-check"><input type="checkbox" id="e-has-wrapping"> <i class="ti ti-box"></i> 포장 옵션</label>
+        <label class="opt-check"><input type="checkbox" id="e-has-wrapping"> <i class="ti ti-box"></i> 포장 유무</label>
+        <label class="opt-check"><input type="checkbox" id="e-has-ribbon"> <i class="ti ti-ribbon"></i> 리본 추가</label>
+        <label class="opt-check"><input type="checkbox" id="e-has-letter"> <i class="ti ti-mail"></i> 레터 동봉</label>
+        <label class="opt-check"><input type="checkbox" id="e-has-sticker"> <i class="ti ti-sticker"></i> 스티커 선택</label>
       </div>
     </div>
 
@@ -770,18 +776,23 @@ function getImgValue() {
 
 function submitProduct() {
   var name = document.getElementById('p-name').value.trim();
-  var category = document.getElementById('p-category').value;
   var description = document.getElementById('p-desc').value.trim();
   var image = getImgValue();
   var tiers = getTiers();
   var categories = getCheckedCats('p-cat');
   var hasWrapping = document.getElementById('p-has-wrapping').checked;
+  var hasRibbon = document.getElementById('p-has-ribbon').checked;
+  var hasLetter = document.getElementById('p-has-letter').checked;
+  var hasSticker = document.getElementById('p-has-sticker').checked;
 
   if (!name) { showToast('상품명을 입력해주세요.'); return; }
   if (!tiers.length) { showToast('수량별 가격을 최소 1개 설정해주세요.'); return; }
   if (!categories.length) { showToast('카테고리를 하나 이상 선택해주세요.'); return; }
 
-  addProduct({ name: name, priceTiers: tiers, categories: categories, description: description, image: image, hasWrapping: hasWrapping });
+  addProduct({
+    name: name, priceTiers: tiers, categories: categories, description: description, image: image,
+    hasWrapping: hasWrapping, hasRibbon: hasRibbon, hasLetter: hasLetter, hasSticker: hasSticker
+  });
   showToast('상품이 추가되었습니다!');
   resetForm();
   renderList();
@@ -790,11 +801,13 @@ function submitProduct() {
 
 function resetForm() {
   document.getElementById('p-name').value = '';
-  document.getElementById('p-category').value = '';
   document.getElementById('p-desc').value = '';
   document.getElementById('p-img-url').value = '';
   document.getElementById('img-preview').style.display = 'none';
   document.getElementById('p-has-wrapping').checked = false;
+  document.getElementById('p-has-ribbon').checked = false;
+  document.getElementById('p-has-letter').checked = false;
+  document.getElementById('p-has-sticker').checked = false;
   document.querySelectorAll('input[name="p-cat"]').forEach(function(el) { el.checked = false; });
   document.getElementById('tier-list').innerHTML = '';
   tierCount = 0;
@@ -859,6 +872,9 @@ function openEditModal(id) {
   document.getElementById('e-name').value = p.name || '';
   document.getElementById('e-desc').value = p.description || '';
   document.getElementById('e-has-wrapping').checked = !!p.hasWrapping;
+  document.getElementById('e-has-ribbon').checked = !!p.hasRibbon;
+  document.getElementById('e-has-letter').checked = !!p.hasLetter;
+  document.getElementById('e-has-sticker').checked = !!p.hasSticker;
   var existingCats = getProductCategories(p);
   document.querySelectorAll('input[name="e-cat"]').forEach(function(el) {
     el.checked = existingCats.indexOf(el.value) !== -1;
@@ -965,7 +981,10 @@ function saveEdit() {
     description: document.getElementById('e-desc').value.trim(),
     image: finalImage,
     priceTiers: tiers,
-    hasWrapping: document.getElementById('e-has-wrapping').checked
+    hasWrapping: document.getElementById('e-has-wrapping').checked,
+    hasRibbon: document.getElementById('e-has-ribbon').checked,
+    hasLetter: document.getElementById('e-has-letter').checked,
+    hasSticker: document.getElementById('e-has-sticker').checked
   });
 
   closeEditModal();
