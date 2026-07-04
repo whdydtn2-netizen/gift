@@ -86,7 +86,7 @@ function clearCart() {
 }
 
 function getCartCount() {
-  return getCart().reduce((sum, i) => sum + (Number(i.qty) || 0), 0);
+  return new Set(getCart().map(i => i.productId)).size;
 }
 
 function getUnitPriceForQty(priceTiers, qty) {
