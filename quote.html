@@ -553,6 +553,7 @@
   © 2026 선물톡 (giftalk). 대외비 시안 — 실제 상호·연락처는 추후 확정 예정입니다.
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="common.js?v=2"></script>
 <script>
 var WRAP_OPTIONS = [
@@ -576,15 +577,15 @@ function tierLabel(t) {
   return t.max ? (t.min + '~' + t.max + '개') : (t.min + '개 이상');
 }
 
-function init() {
+async function init() {
   renderWrapGrid();
   renderStickerGrid();
-  renderModalProducts();
+  await renderModalProducts();
 
   var params = new URLSearchParams(window.location.search);
   var id = params.get('id');
   if (id) {
-    var p = getProductById(id);
+    var p = await getProductById(id);
     if (p) selectProduct(p.id);
   }
 
@@ -592,8 +593,8 @@ function init() {
 }
 
 /* ===== Product picker ===== */
-function renderModalProducts() {
-  var products = getProducts();
+async function renderModalProducts() {
+  var products = await getProducts();
   var grid = document.getElementById('modal-product-grid');
   if (products.length === 0) {
     grid.innerHTML =
@@ -628,8 +629,8 @@ function closeProductModal() {
   document.getElementById('product-modal').classList.remove('open');
 }
 
-function selectProduct(id) {
-  var p = getProductById(id);
+async function selectProduct(id) {
+  var p = await getProductById(id);
   if (!p) return;
   selectedProduct = p;
 

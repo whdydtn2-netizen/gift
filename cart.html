@@ -216,6 +216,7 @@
   © 2026 선물톡 (giftalk). 대외비 시안 — 실제 상호·연락처는 추후 확정 예정입니다.
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="common.js?v=2"></script>
 <script>
 function optsSummary(item) {
@@ -226,7 +227,7 @@ function optsSummary(item) {
   return parts.length ? parts.join(' · ') : '옵션 없음';
 }
 
-function renderCart() {
+async function renderCart() {
   var items = getCart();
   var root = document.getElementById('cart-root');
 
@@ -247,7 +248,7 @@ function renderCart() {
   var totalPrice = 0;
   var hasUnknown = false;
 
-  var products = getProducts();
+  var products = await getProducts();
 
   var itemsHtml = items.map(function(item) {
     var qty = Number(item.qty) || 0;

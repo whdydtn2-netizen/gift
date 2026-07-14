@@ -761,6 +761,7 @@
   © 2026 선물톡 (giftalk). 대외비 시안 — 실제 상호·연락처는 추후 확정 예정입니다.
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="common.js?v=2"></script>
 <script>
 var ADMIN_ID = 'jsmart01';
@@ -839,17 +840,18 @@ function switchTab(mode, btn) {
   document.getElementById('tab-file').style.display = mode === 'file' ? '' : 'none';
 }
 
+var pImageUploadPromise = null;
+
 function previewImg(input) {
   var file = input.files[0];
   if (!file) return;
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    base64Image = e.target.result;
-    var preview = document.getElementById('img-preview');
-    preview.src = base64Image;
-    preview.style.display = 'block';
-  };
-  reader.readAsDataURL(file);
+  var preview = document.getElementById('img-preview');
+  preview.src = URL.createObjectURL(file);
+  preview.style.display = 'block';
+  pImageUploadPromise = uploadProductImage(file).then(function(url) {
+    base64Image = url;
+    return url;
+  });
 }
 
 function getImgValue() {
@@ -859,6 +861,7 @@ function getImgValue() {
 
 /* ===== Detail images (multi) ===== */
 var pDetailImages = [];
+var pDetailUploadPromises = [];
 
 function renderDetailPreview(arr, containerId, removeFn) {
   document.getElementById(containerId).innerHTML = arr.map(function(src, i) {
@@ -872,12 +875,17 @@ function renderDetailPreview(arr, containerId, removeFn) {
 function handlePDetailFiles(input) {
   var files = Array.prototype.slice.call(input.files || []);
   files.forEach(function(file) {
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      pDetailImages.push(e.target.result);
-      renderDetailPreview(pDetailImages, 'p-detail-preview', 'removePDetailImage');
-    };
-    reader.readAsDataURL(file);
+    var placeholder = URL.createObjectURL(file);
+    pDetailImages.push(placeholder);
+    renderDetailPreview(pDetailImages, 'p-detail-preview', 'removePDetailImage');
+    pDetailUploadPromises.push(uploadProductImage(file).then(function(url) {
+      var idx = pDetailImages.indexOf(placeholder);
+      if (idx !== -1) {
+        pDetailImages[idx] = url;
+        renderDetailPreview(pDetailImages, 'p-detail-preview', 'removePDetailImage');
+      }
+      return url;
+    }));
   });
   input.value = '';
 }
@@ -896,10 +904,9 @@ function removePDetailImage(i) {
   renderDetailPreview(pDetailImages, 'p-detail-preview', 'removePDetailImage');
 }
 
-function submitProduct() {
+async function submitProduct() {
   var name = document.getElementById('p-name').value.trim();
   var description = document.getElementById('p-desc').value.trim();
-  var image = getImgValue();
   var tiers = getTiers();
   var categories = getCheckedCats('p-cat');
   var hasWrapping = document.getElementById('p-has-wrapping').checked;
@@ -911,7 +918,12 @@ function submitProduct() {
   if (!tiers.length) { showToast('수량별 가격을 최소 1개 설정해주세요.'); return; }
   if (!categories.length) { showToast('카테고리를 하나 이상 선택해주세요.'); return; }
 
-  addProduct({
+  showToast('상품을 저장하는 중입니다...');
+  if (pImageUploadPromise) await pImageUploadPromise;
+  await Promise.all(pDetailUploadPromises);
+  var image = getImgValue();
+
+  await addProduct({
     name: name, priceTiers: tiers, categories: categories, description: description, image: image,
     detailImages: pDetailImages.slice(),
     hasWrapping: hasWrapping, hasRibbon: hasRibbon, hasLetter: hasLetter, hasSticker: hasSticker
@@ -935,13 +947,15 @@ function resetForm() {
   document.getElementById('tier-list').innerHTML = '';
   tierCount = 0;
   base64Image = null;
+  pImageUploadPromise = null;
   pDetailImages = [];
+  pDetailUploadPromises = [];
   renderDetailPreview(pDetailImages, 'p-detail-preview', 'removePDetailImage');
   addTier();
 }
 
-function renderStats() {
-  var products = getProducts();
+async function renderStats() {
+  var products = await getProducts();
   var counts = {};
   products.forEach(function(p) { counts[p.category] = (counts[p.category] || 0) + 1; });
   var html = '<div class="stat-chip">전체 <strong>' + products.length + '</strong>개</div>';
@@ -951,8 +965,8 @@ function renderStats() {
   document.getElementById('stats-row').innerHTML = html;
 }
 
-function renderList() {
-  var products = getProducts();
+async function renderList() {
+  var products = await getProducts();
   var area = document.getElementById('product-list-area');
 
   if (products.length === 0) {
@@ -988,11 +1002,13 @@ var editingId = null;
 var editTierCount = 0;
 var editBase64Image = null;
 
-function openEditModal(id) {
-  var p = getProductById(id);
+async function openEditModal(id) {
+  var p = await getProductById(id);
   if (!p) return;
   editingId = id;
   editBase64Image = null;
+  editImageUploadPromise = null;
+  editDetailUploadPromises = [];
 
   document.getElementById('e-name').value = p.name || '';
   document.getElementById('e-desc').value = p.description || '';
@@ -1075,32 +1091,39 @@ function getEditTiers() {
   return tiers;
 }
 
+var editImageUploadPromise = null;
+
 function previewEditImg(input) {
   var file = input.files[0];
   if (!file) return;
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    editBase64Image = e.target.result;
-    var prev = document.getElementById('edit-img-preview');
-    prev.src = editBase64Image;
-    prev.style.display = 'block';
-    document.getElementById('e-img-url').value = '';
-  };
-  reader.readAsDataURL(file);
+  var prev = document.getElementById('edit-img-preview');
+  prev.src = URL.createObjectURL(file);
+  prev.style.display = 'block';
+  document.getElementById('e-img-url').value = '';
+  editImageUploadPromise = uploadProductImage(file).then(function(url) {
+    editBase64Image = url;
+    return url;
+  });
 }
 
 /* ===== Detail images (edit, multi) ===== */
 var editDetailImages = [];
+var editDetailUploadPromises = [];
 
 function handleEDetailFiles(input) {
   var files = Array.prototype.slice.call(input.files || []);
   files.forEach(function(file) {
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      editDetailImages.push(e.target.result);
-      renderDetailPreview(editDetailImages, 'e-detail-preview', 'removeEDetailImage');
-    };
-    reader.readAsDataURL(file);
+    var placeholder = URL.createObjectURL(file);
+    editDetailImages.push(placeholder);
+    renderDetailPreview(editDetailImages, 'e-detail-preview', 'removeEDetailImage');
+    editDetailUploadPromises.push(uploadProductImage(file).then(function(url) {
+      var idx = editDetailImages.indexOf(placeholder);
+      if (idx !== -1) {
+        editDetailImages[idx] = url;
+        renderDetailPreview(editDetailImages, 'e-detail-preview', 'removeEDetailImage');
+      }
+      return url;
+    }));
   });
   input.value = '';
 }
@@ -1119,7 +1142,7 @@ function removeEDetailImage(i) {
   renderDetailPreview(editDetailImages, 'e-detail-preview', 'removeEDetailImage');
 }
 
-function saveEdit() {
+async function saveEdit() {
   var name = document.getElementById('e-name').value.trim();
   var tiers = getEditTiers();
   var categories = getCheckedCats('e-cat');
@@ -1128,12 +1151,16 @@ function saveEdit() {
   if (!tiers.length) { showToast('수량별 가격을 최소 1개 설정해주세요.'); return; }
   if (!categories.length) { showToast('카테고리를 하나 이상 선택해주세요.'); return; }
 
+  showToast('상품을 저장하는 중입니다...');
+  if (editImageUploadPromise) await editImageUploadPromise;
+  await Promise.all(editDetailUploadPromises);
+
   var urlInput = document.getElementById('e-img-url').value.trim();
   var newImage = editBase64Image || urlInput || null;
-  var existing = getProductById(editingId);
+  var existing = await getProductById(editingId);
   var finalImage = newImage !== null ? newImage : (existing ? existing.image : '');
 
-  updateProduct(editingId, {
+  await updateProduct(editingId, {
     name: name,
     categories: categories,
     description: document.getElementById('e-desc').value.trim(),
@@ -1157,9 +1184,9 @@ document.addEventListener('click', function(e) {
   if (e.target === document.getElementById('edit-modal')) closeEditModal();
 });
 
-function confirmDelete(id, name) {
+async function confirmDelete(id, name) {
   if (confirm('"' + name + '"을(를) 삭제하시겠습니까?')) {
-    deleteProduct(id);
+    await deleteProduct(id);
     renderList();
     renderStats();
     showToast('상품이 삭제되었습니다.');

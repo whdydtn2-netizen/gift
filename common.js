@@ -1,6 +1,9 @@
-const GIFTALK_KEY = 'giftalk_products';
 const CART_KEY = 'giftalk_cart';
 const CHECKOUT_DRAFT_KEY = 'giftalk_checkout_draft';
+
+const SUPABASE_URL = 'https://vhixtyreqlcxkuwsgdcv.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoaXh0eXJlcWxjeGt1d3NnZGN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NjQ4MzksImV4cCI6MjA5OTU0MDgzOX0.qaCDzJsixCkfdcrIBViH50zOt_cddp22aJrlc31sTYQ';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const CATEGORY_LABELS = {
   wedding: '결혼·돌잔치답례',
@@ -10,29 +13,72 @@ const CATEGORY_LABELS = {
   celebration: '축하선물'
 };
 
-function getProducts() {
-  try { return JSON.parse(localStorage.getItem(GIFTALK_KEY) || '[]'); }
-  catch(e) { return []; }
+function mapRowToProduct(row) {
+  return {
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    image: row.image,
+    detailImages: row.detail_images || [],
+    priceTiers: row.price_tiers || [],
+    categories: row.categories || [],
+    hasWrapping: row.has_wrapping,
+    hasRibbon: row.has_ribbon,
+    hasLetter: row.has_letter,
+    hasSticker: row.has_sticker
+  };
 }
 
-function saveProducts(products) {
-  localStorage.setItem(GIFTALK_KEY, JSON.stringify(products));
+function mapProductToRow(product) {
+  return {
+    name: product.name,
+    description: product.description,
+    image: product.image,
+    detail_images: product.detailImages || [],
+    price_tiers: product.priceTiers || [],
+    categories: product.categories || [],
+    has_wrapping: !!product.hasWrapping,
+    has_ribbon: !!product.hasRibbon,
+    has_letter: !!product.hasLetter,
+    has_sticker: !!product.hasSticker
+  };
 }
 
-function addProduct(product) {
-  const products = getProducts();
-  product.id = Date.now().toString() + Math.random().toString(36).slice(2, 5);
-  products.unshift(product);
-  saveProducts(products);
-  return product;
+async function getProducts() {
+  const { data, error } = await sb.from('products').select('*').order('created_at', { ascending: false });
+  if (error) { console.error(error); return []; }
+  return data.map(mapRowToProduct);
 }
 
-function deleteProduct(id) {
-  saveProducts(getProducts().filter(p => p.id !== id));
+async function getProductById(id) {
+  const { data, error } = await sb.from('products').select('*').eq('id', id).maybeSingle();
+  if (error || !data) return null;
+  return mapRowToProduct(data);
 }
 
-function updateProduct(id, data) {
-  saveProducts(getProducts().map(p => p.id === id ? Object.assign({}, p, data) : p));
+async function addProduct(product) {
+  const id = Date.now().toString() + Math.random().toString(36).slice(2, 5);
+  const row = Object.assign({ id: id }, mapProductToRow(product));
+  const { data, error } = await sb.from('products').insert(row).select().single();
+  if (error) { console.error(error); return null; }
+  return mapRowToProduct(data);
+}
+
+async function deleteProduct(id) {
+  const { error } = await sb.from('products').delete().eq('id', id);
+  if (error) console.error(error);
+}
+
+async function updateProduct(id, data) {
+  const { error } = await sb.from('products').update(mapProductToRow(data)).eq('id', id);
+  if (error) console.error(error);
+}
+
+async function uploadProductImage(file) {
+  const path = Date.now().toString() + Math.random().toString(36).slice(2, 8) + '-' + file.name;
+  const { error } = await sb.storage.from('product-images').upload(path, file);
+  if (error) { console.error(error); return null; }
+  return sb.storage.from('product-images').getPublicUrl(path).data.publicUrl;
 }
 
 function getProductCategories(p) {
@@ -41,8 +87,8 @@ function getProductCategories(p) {
   return [];
 }
 
-function getProductsByCategory(category) {
-  const all = getProducts();
+async function getProductsByCategory(category) {
+  const all = await getProducts();
   if (!category || category === 'all') return all;
   return all.filter(function(p) {
     return getProductCategories(p).indexOf(category) !== -1;
@@ -248,10 +294,6 @@ function doAdminLogin() {
 })();
 
 // ===== Product Helpers =====
-function getProductById(id) {
-  return getProducts().find(function(p) { return p.id === id; }) || null;
-}
-
 function getStartingPrice(p) {
   if (p.priceTiers && p.priceTiers.length) {
     var sorted = p.priceTiers.slice().sort(function(a, b) { return a.min - b.min; });

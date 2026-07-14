@@ -422,6 +422,7 @@
   © 2026 선물톡 (giftalk). 대외비 시안 — 실제 상호·연락처는 추후 확정 예정입니다.
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="common.js?v=2"></script>
 <script>
 var product = null;
@@ -430,10 +431,10 @@ var selectedSticker = '선택 안 함';
 var slideImages = [];
 var currentSlide = 0;
 
-function init() {
+async function init() {
   var params = new URLSearchParams(window.location.search);
   var id = params.get('id');
-  product = id ? getProductById(id) : null;
+  product = id ? await getProductById(id) : null;
 
   if (!product) {
     document.getElementById('page-root').innerHTML =
