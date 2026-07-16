@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>관리자 — 선물톡</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
-<link rel="stylesheet" href="common.css?v=2">
+<link rel="stylesheet" href="common.css?v=3">
 <style>
   .admin-wrap {
     max-width: 1080px;
@@ -762,7 +762,7 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="common.js?v=2"></script>
+<script src="common.js?v=3"></script>
 <script>
 var ADMIN_ID = 'jsmart01';
 var ADMIN_PW = 'ks-10293035';
@@ -923,11 +923,15 @@ async function submitProduct() {
   await Promise.all(pDetailUploadPromises);
   var image = getImgValue();
 
-  await addProduct({
+  var saved = await addProduct({
     name: name, priceTiers: tiers, categories: categories, description: description, image: image,
     detailImages: pDetailImages.slice(),
     hasWrapping: hasWrapping, hasRibbon: hasRibbon, hasLetter: hasLetter, hasSticker: hasSticker
   });
+  if (!saved) {
+    showToast('저장에 실패했습니다. 콘솔을 확인하거나 잠시 후 다시 시도해주세요.');
+    return;
+  }
   showToast('상품이 추가되었습니다!');
   resetForm();
   renderList();
@@ -1160,7 +1164,7 @@ async function saveEdit() {
   var existing = await getProductById(editingId);
   var finalImage = newImage !== null ? newImage : (existing ? existing.image : '');
 
-  await updateProduct(editingId, {
+  var ok = await updateProduct(editingId, {
     name: name,
     categories: categories,
     description: document.getElementById('e-desc').value.trim(),
@@ -1172,6 +1176,11 @@ async function saveEdit() {
     hasLetter: document.getElementById('e-has-letter').checked,
     hasSticker: document.getElementById('e-has-sticker').checked
   });
+
+  if (!ok) {
+    showToast('수정에 실패했습니다. 콘솔을 확인하거나 잠시 후 다시 시도해주세요.');
+    return;
+  }
 
   closeEditModal();
   renderList();

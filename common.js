@@ -71,7 +71,8 @@ async function deleteProduct(id) {
 
 async function updateProduct(id, data) {
   const { error } = await sb.from('products').update(mapProductToRow(data)).eq('id', id);
-  if (error) console.error(error);
+  if (error) { console.error(error); return false; }
+  return true;
 }
 
 async function uploadProductImage(file) {
